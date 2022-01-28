@@ -3,8 +3,8 @@ import tensorflow as tf
 
 from simple_unet_model import simple_unet_model
 
-WIDTH = 128*2
-HEIGHT = 128*2
+WIDTH = 256
+HEIGHT = 256
 
 # Load the model (and load weights)
 model = simple_unet_model(HEIGHT, WIDTH, 3)

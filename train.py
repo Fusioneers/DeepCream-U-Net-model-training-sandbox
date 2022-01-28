@@ -1,6 +1,7 @@
 import os
 import random
 import numpy as np
+import tensorflow.python.keras.models
 from matplotlib import pyplot as plt
 from PIL import Image
 from numpy import asarray
@@ -14,15 +15,15 @@ from simple_unet_model import simple_unet_model
 image_directory = 'data/generated/generated_patches/images/'
 mask_directory = 'data/generated/generated_patches/masks/'
 
-WIDTH = 128 * 2
-HEIGHT = 128 * 2
+WIDTH = 256
+HEIGHT = 256
 image_dataset = []
 mask_dataset = []
 
 # Load images and masks
 images = sorted(os.listdir(image_directory))
 for i, file_name in enumerate(images):
-    if file_name.endswith('TIF') and i < 1000:
+    if file_name.endswith('TIF') and i < 2000:
         image = Image.open(image_directory + file_name)
         mask = Image.open(mask_directory + file_name)
 
@@ -45,13 +46,10 @@ X_train, X_test, y_train, y_test = train_test_split(image_dataset, mask_dataset,
 
 # -- Train --
 
-def get_model():
-    return simple_unet_model(HEIGHT, WIDTH, 3)
-
-
 # Load the model (and load weights)
-model = get_model()
-# model.load_weights('models/keras/saved_model.pb')
+# model = simple_unet_model(HEIGHT, WIDTH, 3)
+
+model = tensorflow.keras.models.load_model('models/keras')
 
 # Format variables
 X_train = np.asarray(X_train)
@@ -71,7 +69,7 @@ plt.imshow(y_train[0])
 plt.show()
 
 # Train the model
-history = model.fit(X_train, y_train, verbose=1, epochs=2, validation_data=(X_train, y_train))
+history = model.fit(X_train, y_train, verbose=1, epochs=1, validation_data=(X_train, y_train))
 
 # Save the model
 model.save('models/keras')

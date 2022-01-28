@@ -1,11 +1,10 @@
 # https://youtu.be/csFGTLT6_WQ
-# u-net model
 
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, concatenate, Conv2DTranspose, Dropout
 
 
-################################################################
+# Define the structure of the model
 def simple_unet_model(IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS):
     # Build the model
     inputs = Input((IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS))

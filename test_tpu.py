@@ -1,4 +1,6 @@
 import os
+import random
+
 import tensorflow as tf
 import numpy as np
 from PIL import Image
@@ -13,15 +15,17 @@ from sklearn.model_selection import train_test_split
 image_directory = 'data/generated/generated_patches/images/'
 mask_directory = 'data/generated/generated_patches/masks/'
 
-WIDTH = 128 * 2
-HEIGHT = 128 * 2
+WIDTH = 256
+HEIGHT = 256
 image_dataset = []
 mask_dataset = []
+
+image_number = random.randint(0, len(os.listdir(image_directory))-1)
 
 # Load images and masks
 images = sorted(os.listdir(image_directory))
 for i, file_name in enumerate(images):
-    if file_name.endswith('TIF') and i < 50:
+    if i == image_number and file_name.endswith('TIF'):
         image = Image.open(image_directory + file_name)
         mask = Image.open(mask_directory + file_name)
 
@@ -56,29 +60,26 @@ interpreter.allocate_tensors()
 input_details = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 
-print(input_details)
-
 # Test model on input data.
 input_shape = input_details[0]['shape']
 input_data = np.array(np.random.random_sample(input_shape), dtype=np.float32)
-interpreter.set_tensor(input_details[0]['index'], [X_test[10]])
+interpreter.set_tensor(input_details[0]['index'], [X_test[0]])
 
 interpreter.invoke()
 
 # The function `get_tensor()` returns a copy of the tensor data.
 # Use `tensor()` in order to get a pointer to the tensor.
-print(interpreter.get_tensor(97))
-output_data = interpreter.get_tensor(97)
+output_data = interpreter.get_tensor(output_details[0]['index'])
 
 # Display the first 10 results
 plt.figure(figsize=(12, 8))
 plt.subplot(131)
 plt.title('X_test example')
-plt.imshow(X_test[10])
+plt.imshow(X_test[0])
 plt.subplot(132)
 plt.title('y_pred example')
 plt.imshow(output_data[0] > 0.5)
 plt.subplot(133)
 plt.title('y_test example')
-plt.imshow(y_test[10])
+plt.imshow(y_test[0])
 plt.show()

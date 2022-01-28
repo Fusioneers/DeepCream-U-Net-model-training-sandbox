@@ -11,13 +11,13 @@ from simple_unet_model import simple_unet_model
 image_directory = 'data/generated/generated_patches/images/'
 mask_directory = 'data/generated/generated_patches/masks/'
 
-WIDTH = 128 * 2
-HEIGHT = 128 * 2
+WIDTH = 256
+HEIGHT = 256
 image_dataset = []
 mask_dataset = []
 
 # Load images and masks
-images = sorted(os.listdir(image_directory))
+images = sorted(os.listdir(image_directory), reverse=True)
 for i, file_name in enumerate(images):
     if file_name.endswith('TIF') and i < 20:
         image = Image.open(image_directory + file_name)
