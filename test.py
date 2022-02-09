@@ -1,26 +1,28 @@
 import os
+import tensorflow as tf
 import numpy as np
 from matplotlib import pyplot as plt
 from PIL import Image
 from numpy import asarray
-from simple_unet_model import simple_unet_model
 
 # -- Load the test data --
 
 # Define variables
-image_directory = 'data/generated/generated_patches/images/'
-mask_directory = 'data/generated/generated_patches/masks/'
+image_directory = 'data/hand_annotated_2/generated_patches/images/'
+mask_directory = 'data/hand_annotated_2/generated_patches/masks/'
 
 WIDTH = 256
-HEIGHT = 256
+HEIGHT = 192
 image_dataset = []
 mask_dataset = []
 
+print("Loading images ...")
+
 # Load images and masks
-images = sorted(os.listdir(image_directory), reverse=True)
-for i, file_name in enumerate(images):
-    if file_name.endswith('TIF') and i < 20:
-        image = Image.open(image_directory + file_name)
+masks = sorted(os.listdir(mask_directory))
+for i, file_name in enumerate(masks):
+    if file_name.endswith('tiff'):
+        image = Image.open(image_directory + file_name.replace('tiff', 'jpg'))
         mask = Image.open(mask_directory + file_name)
 
         image.thumbnail((WIDTH, HEIGHT))
@@ -33,27 +35,45 @@ for i, file_name in enumerate(images):
         mask_pixels = mask_pixels.astype('float32')
         mask_pixels /= 255.0
 
+        # Show image and mask (for debug purposes)
+        # plt.figure(figsize=(12, 8))
+        # plt.subplot(121)
+        # plt.title('image_pixels')
+        # plt.imshow(image_pixels)
+        # plt.subplot(122)
+        # plt.title('mask_pixels')
+        # plt.imshow(mask_pixels)
+        # plt.show()
+
         image_dataset.append(np.array(image_pixels))
         mask_dataset.append(np.array(mask_pixels))
 
 X_test, y_test = image_dataset, mask_dataset
 
+print("Done!")
 
-# -- Predict --
+# -- Load model and predict --
+
+print("Loading model ...")
 
 # Load the model (and load weights)
-model = simple_unet_model(HEIGHT, WIDTH, 3)
-model.load_weights('models/keras')
+model = tf.keras.models.load_model('models/keras')
+
+print("Done!")
 
 # Format variables
 X_test = np.asarray(X_test)
 y_test = np.asarray(y_test)
 
+print("Predicting ...")
+
 # Predict
 y_pred = model.predict(X_test)
 
-# Display the first 10 results
-for i in range(len(y_pred) - 1):
+print(y_pred.shape)
+
+# Display the results
+for i in range(0, len(y_pred)):
     plt.figure(figsize=(12, 8))
     plt.subplot(131)
     plt.title('X_test example')
@@ -65,3 +85,5 @@ for i in range(len(y_pred) - 1):
     plt.title('y_test example')
     plt.imshow(y_test[i])
     plt.show()
+
+print("Done!")

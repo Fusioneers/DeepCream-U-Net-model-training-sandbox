@@ -5,9 +5,9 @@ from keras.layers import Input, Conv2D, MaxPooling2D, concatenate, Conv2DTranspo
 
 
 # Define the structure of the model
-def simple_unet_model(IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS):
+def unet_model(img_height, img_width, img_channels):
     # Build the model
-    inputs = Input((IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS))
+    inputs = Input((img_height, img_width, img_channels))
     s = inputs
 
     # Contraction path
