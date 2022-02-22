@@ -1,15 +1,16 @@
 import os
+
 import tensorflow as tf
 import numpy as np
 from matplotlib import pyplot as plt
-from PIL import Image
+from PIL import Image, ImageOps
 from numpy import asarray
 
 # -- Load the test data --
 
 # Define variables
-image_directory = 'data/hand_annotated_2/generated_patches/images/'
-mask_directory = 'data/hand_annotated_2/generated_patches/masks/'
+image_directory = 'data/auto_annotated/generated_patches/images/'
+mask_directory = 'data/auto_annotated/generated_patches/masks/'
 
 WIDTH = 256
 HEIGHT = 192
@@ -21,9 +22,10 @@ print("Loading images ...")
 # Load images and masks
 masks = sorted(os.listdir(mask_directory))
 for i, file_name in enumerate(masks):
-    if file_name.endswith('tiff'):
-        image = Image.open(image_directory + file_name.replace('tiff', 'jpg'))
+    if file_name.endswith('tiff') and i > 150:
+        image = Image.open(image_directory + (file_name.replace('_finalprediction.ome', '')).replace('tiff', 'jpg'))
         mask = Image.open(mask_directory + file_name)
+        mask = ImageOps.invert(mask)
 
         image.thumbnail((WIDTH, HEIGHT))
         mask.thumbnail((WIDTH, HEIGHT))
@@ -31,6 +33,7 @@ for i, file_name in enumerate(masks):
         image_pixels = asarray(image)
         image_pixels = image_pixels.astype('float32')
         image_pixels /= 255.0
+        # image_pixels = cv2.cvtColor(image_pixels, cv2.COLOR_BGR2RGB) not needed anymore
         mask_pixels = asarray(mask)
         mask_pixels = mask_pixels.astype('float32')
         mask_pixels /= 255.0
@@ -70,7 +73,7 @@ print("Predicting ...")
 # Predict
 y_pred = model.predict(X_test)
 
-print(y_pred.shape)
+print(len(y_pred))
 
 # Display the results
 for i in range(0, len(y_pred)):
@@ -80,7 +83,7 @@ for i in range(0, len(y_pred)):
     plt.imshow(X_test[i])
     plt.subplot(132)
     plt.title('y_pred example')
-    plt.imshow(y_pred[i] > 0.5)
+    plt.imshow(y_pred[i])
     plt.subplot(133)
     plt.title('y_test example')
     plt.imshow(y_test[i])

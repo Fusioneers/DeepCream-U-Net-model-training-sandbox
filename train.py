@@ -2,7 +2,7 @@ import os
 import numpy as np
 import tensorflow
 from matplotlib import pyplot as plt
-from PIL import Image
+from PIL import Image, ImageOps
 from numpy import asarray
 from sklearn.model_selection import train_test_split
 from unet_model import unet_model
@@ -11,8 +11,8 @@ from unet_model import unet_model
 # -- Load the training and test data --
 
 # Define variables
-image_directory = 'data/hand_annotated/generated_patches/images/'
-mask_directory = 'data/hand_annotated/generated_patches/masks/'
+image_directory = 'data/auto_annotated/generated_patches/images/'
+mask_directory = 'data/auto_annotated/generated_patches/masks/'
 
 WIDTH = 256
 HEIGHT = 192
@@ -23,8 +23,9 @@ mask_dataset = []
 masks = sorted(os.listdir(mask_directory))
 for i, file_name in enumerate(masks):
     if file_name.endswith('tiff'):
-        image = Image.open(image_directory + file_name.replace('tiff', 'jpg'))
+        image = Image.open(image_directory + (file_name.replace('_finalprediction.ome', '')).replace('tiff', 'jpg'))
         mask = Image.open(mask_directory + file_name)
+        mask = ImageOps.invert(mask)
 
         image.thumbnail((WIDTH, HEIGHT))
         mask.thumbnail((WIDTH, HEIGHT))
@@ -67,7 +68,7 @@ y_train = np.asarray(y_train)
 y_test = np.asarray(y_test)
 
 # Train the model
-history = model.fit(X_train, y_train, verbose=1, epochs=20, validation_data=(X_train, y_train))
+history = model.fit(X_train, y_train, verbose=1, epochs=15, validation_data=(X_train, y_train))
 
 # Save the model
 model.save('models/keras')

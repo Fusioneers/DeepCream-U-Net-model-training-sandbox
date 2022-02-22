@@ -78,6 +78,7 @@ print("Done!")
 print("Predicting ...")
 
 for i in range(0, len(X_test)):
+    print(np.array([X_test[i]]).shape)
     # Test model on input data.
     interpreter.set_tensor(input_details[0]['index'], [X_test[i]])
     interpreter.invoke()
