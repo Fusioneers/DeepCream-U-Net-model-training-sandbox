@@ -1,3 +1,5 @@
+__pycache__/
+
 # Exclude the trainig and test data (Can be uploaded to GitHub but makes pushes very slow)
 data/images/*
 data/masks/*
