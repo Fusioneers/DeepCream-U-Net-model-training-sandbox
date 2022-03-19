@@ -1,3 +1,7 @@
+# This script trains an AI on the test data and output the keras model into the models/keras folder
+
+# -- Imports --
+
 import os
 import numpy as np
 import tensorflow
@@ -7,12 +11,14 @@ from numpy import asarray
 from sklearn.model_selection import train_test_split
 from unet_model import unet_model
 
-
 # -- Load the training and test data --
 
 # Define variables
-image_directory = 'data/auto_annotated/generated_patches/images/'
-mask_directory = 'data/auto_annotated/generated_patches/masks/'
+image_directory = 'data/images/'
+mask_directory = 'data/masks/'
+
+image_extension = 'jpg'
+mask_extension = 'tiff'
 
 WIDTH = 256
 HEIGHT = 192
@@ -22,46 +28,49 @@ mask_dataset = []
 # Load images and masks
 masks = sorted(os.listdir(mask_directory))
 for i, file_name in enumerate(masks):
-    if file_name.endswith('tiff'):
-        image = Image.open(image_directory + (file_name.replace('_finalprediction.ome', '')).replace('tiff', 'jpg'))
+    if file_name.endswith(mask_extension):
+        image = Image.open(image_directory + file_name.replace(mask_extension, image_extension))
         mask = Image.open(mask_directory + file_name)
-        mask = ImageOps.invert(mask)
 
-        image.thumbnail((WIDTH, HEIGHT))
-        mask.thumbnail((WIDTH, HEIGHT))
+        # Resize the image
+        scaled_image = ImageOps.fit(image, (WIDTH, HEIGHT), Image.ANTIALIAS)
+        # Convert it back to an array
+        scaled_image_array = asarray(scaled_image)
+        scaled_image_array = scaled_image_array.astype('float32')
+        # Scale the pixel values to lie between 0 and 1
+        scaled_image_array /= 255.0
 
-        image_pixels = asarray(image)
-        image_pixels = image_pixels.astype('float32')
-        image_pixels /= 255.0
-        # image_pixels = cv2.cvtColor(image_pixels, cv2.COLOR_BGR2RGB) not needed anymore
-        mask_pixels = asarray(mask)
-        mask_pixels = mask_pixels.astype('float32')
-        mask_pixels /= 255.0
+        # Resize the mask
+        scaled_mask = ImageOps.fit(mask, (WIDTH, HEIGHT), Image.ANTIALIAS)
+        # Convert it back to an array
+        scaled_mask_array = asarray(scaled_mask)
+        scaled_mask_array = scaled_mask_array.astype('float32')
+        # Scale the pixel values to lie between 0 and 1
+        scaled_mask_array /= 255.0
 
         # Show image and mask (for debug purposes)
         # plt.figure(figsize=(12, 8))
         # plt.subplot(121)
-        # plt.title('image_pixels')
-        # plt.imshow(image_pixels)
+        # plt.title('scaled_image_array')
+        # plt.imshow(scaled_image_array)
         # plt.subplot(122)
-        # plt.title('mask_pixels')
-        # plt.imshow(mask_pixels)
+        # plt.title('scaled_mask_array')
+        # plt.imshow(scaled_mask_array)
         # plt.show()
 
-        image_dataset.append(np.array(image_pixels))
-        mask_dataset.append(np.array(mask_pixels))
+        image_dataset.append(np.array(scaled_image_array))
+        mask_dataset.append(np.array(scaled_mask_array))
 
 # Split training and test set
 X_train, X_test, y_train, y_test = train_test_split(image_dataset, mask_dataset, test_size=0.1)
 
-
 # -- Train --
 
 # Load the model (and load weights)
-# model = unet_model(HEIGHT, WIDTH, 3)
-model = tensorflow.keras.models.load_model('models/keras')
+model = unet_model(HEIGHT, WIDTH, 3)  # instantiate a new model
+# model = tensorflow.keras.models.load_model('models/keras')  # Load an existing model and continue its training
 
-# Format variables
+# Format training and test data
 X_train = np.asarray(X_train)
 X_test = np.asarray(X_test)
 y_train = np.asarray(y_train)

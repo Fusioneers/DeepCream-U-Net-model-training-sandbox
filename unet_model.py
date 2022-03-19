@@ -1,8 +1,12 @@
-# https://youtu.be/csFGTLT6_WQ
+# This script describes the machine learning model, in this case a U-Net model
+
+# -- Imports --
 
 from keras.models import Model
 from keras.layers import Input, Conv2D, MaxPooling2D, concatenate, Conv2DTranspose, Dropout
 
+
+# -- The model itself --
 
 # Define the structure of the model
 def unet_model(img_height, img_width, img_channels):
@@ -62,6 +66,7 @@ def unet_model(img_height, img_width, img_channels):
 
     outputs = Conv2D(1, (1, 1), activation='sigmoid')(c9)
 
+    # Actually instantiate the model class using the above definitions and define an optimizer
     model = Model(inputs=inputs, outputs=[outputs])
     model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
     model.summary()

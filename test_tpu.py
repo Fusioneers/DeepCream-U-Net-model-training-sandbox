@@ -1,19 +1,23 @@
-import os
-import random
+# This script is equivalent to test.py except that it uses a tensorflow lite model
 
-import cv2
-import tensorflow as tf
+# -- Imports --
+
+import os
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
 from matplotlib import pyplot as plt
 from numpy import asarray
 from pycoral.utils import edgetpu
 
+
 # -- Load the training and test data --
 
 # Define variables
-image_directory = 'data/hand_annotated_2/generated_patches/images/'
-mask_directory = 'data/hand_annotated_2/generated_patches/masks/'
+image_directory = 'data/images/'
+mask_directory = 'data/masks/'
+
+image_extension = 'jpg'
+mask_extension = 'tiff'
 
 WIDTH = 256
 HEIGHT = 192
@@ -25,32 +29,38 @@ print("Loading images ...")
 # Load images and masks
 masks = sorted(os.listdir(mask_directory))
 for i, file_name in enumerate(masks):
-    if file_name.endswith('tiff'):
-        image = Image.open(image_directory + file_name.replace('tiff', 'jpg'))
+    if file_name.endswith(mask_extension):
+        image = Image.open(image_directory + file_name.replace(mask_extension, image_extension))
         mask = Image.open(mask_directory + file_name)
 
-        image.thumbnail((WIDTH, HEIGHT))
-        mask.thumbnail((WIDTH, HEIGHT))
+        # Resize the image
+        scaled_image = ImageOps.fit(image, (WIDTH, HEIGHT), Image.ANTIALIAS)
+        # Convert it back to an array
+        scaled_image_array = asarray(scaled_image)
+        scaled_image_array = scaled_image_array.astype('float32')
+        # Scale the pixel values to lie between 0 and 1
+        scaled_image_array /= 255.0
 
-        image_pixels = asarray(image)
-        image_pixels = image_pixels.astype('float32')
-        image_pixels /= 255.0
-        mask_pixels = asarray(mask)
-        mask_pixels = mask_pixels.astype('float32')
-        mask_pixels /= 255.0
+        # Resize the mask
+        scaled_mask = ImageOps.fit(mask, (WIDTH, HEIGHT), Image.ANTIALIAS)
+        # Convert it back to an array
+        scaled_mask_array = asarray(scaled_mask)
+        scaled_mask_array = scaled_mask_array.astype('float32')
+        # Scale the pixel values to lie between 0 and 1
+        scaled_mask_array /= 255.0
 
         # Show image and mask (for debug purposes)
         # plt.figure(figsize=(12, 8))
         # plt.subplot(121)
-        # plt.title('image_pixels')
-        # plt.imshow(image_pixels)
+        # plt.title('scaled_image_array')
+        # plt.imshow(scaled_image_array)
         # plt.subplot(122)
-        # plt.title('mask_pixels')
-        # plt.imshow(mask_pixels)
+        # plt.title('scaled_mask_array')
+        # plt.imshow(scaled_mask_array)
         # plt.show()
 
-        image_dataset.append(np.array(image_pixels))
-        mask_dataset.append(np.array(mask_pixels))
+        image_dataset.append(np.array(scaled_image_array))
+        mask_dataset.append(np.array(scaled_mask_array))
 
 X_test, y_test = image_dataset, mask_dataset
 
@@ -62,12 +72,6 @@ print("Loading model ...")
 
 # Load TFLite model and allocate tensors.
 interpreter = edgetpu.make_interpreter("models/tflite/model.tflite")
-# interpreter = tf.lite.Interpreter(
-#     model_path="models/tflite/script.tflite", model_content=None, experimental_delegates=None,
-#     num_threads=None,
-#     experimental_op_resolver_type=tf.lite.experimental.OpResolverType.AUTO,
-#     experimental_preserve_all_tensors=False
-# )
 interpreter.allocate_tensors()
 
 # Get input and output tensors.
@@ -77,17 +81,16 @@ output_details = interpreter.get_output_details()
 print("Done!")
 print("Predicting ...")
 
+# Iterate through the test data, make a prediction for each one and immediately show it
 for i in range(0, len(X_test)):
-    print(np.array([X_test[i]]).shape)
     # Test model on input data.
     interpreter.set_tensor(input_details[0]['index'], [X_test[i]])
     interpreter.invoke()
 
     # The function `get_tensor()` returns a copy of the tensor data.
-    # Use `tensor()` in order to get a pointer to the tensor.
     output_data = interpreter.get_tensor(output_details[0]['index'])
 
-    # Display the first 10 results
+    # Display the image with its prediction
     plt.figure(figsize=(12, 8))
     plt.subplot(131)
     plt.title('X_test example')

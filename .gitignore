@@ -1,2 +1,6 @@
-data/*
+# Exclude the trainig and test data (Can be uploaded to GitHub but makes pushes very slow)
+data/images/*
+data/masks/*
+
+# Exclude the .idea file created by PyCharm
 .idea
