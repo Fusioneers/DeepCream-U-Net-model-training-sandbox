@@ -24,7 +24,7 @@ Here's a simple rundown of when and how to use this project.
 
 ## Project structure
 ```
- U-Net-model-training-sandbox/
+U-Net-model-training-sandbox/
 ├─ data/
 │  ├─ images/
 │  │  ├─ example1.jpg
