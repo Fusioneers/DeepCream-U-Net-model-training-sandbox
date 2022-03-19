@@ -23,6 +23,7 @@ Here's a simple rundown of when and how to use this project.
 6. Run the test.py to test your model
 
 ## Project structure
+```
  U-Net-model-training-sandbox/
 ├─ data/
 │  ├─ images/
@@ -44,6 +45,7 @@ Here's a simple rundown of when and how to use this project.
 ├─ test_tpu.py
 ├─ train.py
 ├─ unet_model.py
+```
 
 ## Contribute
 If you discover a bug or have a suggestion on how to improve this sandbox, feel free to open an issue or
