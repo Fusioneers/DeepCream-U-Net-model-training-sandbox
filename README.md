@@ -1,6 +1,6 @@
-# U-Net model training sandbox
+# U-Net model training sandbox for [DeepCream](https://github.com/Fusioneers/DeepCream)
 
-This is the project we used to train the machine learning model used in the cloud detection part of DeepCream.
+This is the project we used to train the machine learning model used in the cloud detection part of [DeepCream](https://github.com/Fusioneers/DeepCream).
 It features a simple U-Net model, a script to train and one to test it. Also included is a script to convert the
 keras model to a tensorflow lite model (.tflite) and test that model on a tpu (like Google coral tpu). So all in all
 it's a nice starting point for an AI project, especially if you are just starting out with machine development and
