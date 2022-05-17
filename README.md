@@ -61,3 +61,12 @@ https://www.kaggle.com/
 
 ### ... to get into image segmentation without any coding abilities 
 https://www.apeer.com/home/
+
+
+---
+**Fusioneers** ([@Fusioneers](https://github.com/Fusioneers)) 2022
+
+* **Kevin Kretz** ([@theKevinKretz](https://github.com/theKevinKretz))
+* **Daniel Meiborg** ([@DanielMeiborg](https://github.com/DanielMeiborg))
+* **Paul Maier** ([@C0mput3r5c13nt15t](https://github.com/C0mput3r5c13nt15t))
+* **Lukas Pottgiesser** ([@Lukas-Pottgiesser](https://github.com/Lukas-Pottgiesser))
